@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVOLUTION ODYSSEY - RPG Adventure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Cinzel+Decorative:wght@700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .font-display { font-family: 'Cinzel', serif; }
+        .font-decorative { font-family: 'Cinzel Decorative', cursive; }
+        
+        /* ==================== */
+        /* TITLE SCREEN */
+        /* ==================== */
+        #title-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3e 50%, #0f3460 100%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* Animated Background Particles */
+        .particles {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        /* Glowing Orb Background */
+        .orb {
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(74,222,128,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        /* Title Styling */
+        .game-title {
+            font-size: 6rem;
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, #4ade80 50%, #22c55e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 80px rgba(74,222,128,0.5);
+            animation: titleGlow 3s ease-in-out infinite;
+            z-index: 10;
+            letter-spacing: 0.1em;
+        }
+        
+        @keyframes titleGlow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 30px rgba(74,222,128,0.8)); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 60px rgba(74,222,128,1)); }
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.7);
+            margin-top: 1rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+        
+        /* Menu Buttons */
+        .menu-container {
+            margin-top: 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 10;
+        }
+        
+        .menu-btn {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-family: 'Cinzel', serif;
+            background: transparent;
+            border: 2px solid rgba(74,222,128,0.5);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            min-width: 300px;
+            text-align: center;
+        }
+        
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(74,222,128,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .menu-btn:hover::before {
+            left: 100%;
+        }
+        
+        .menu-btn:hover {
+            background: rgba(74,222,128,0.2);
+            border-color: #4ade80;
+            transform: translateX(10px);
+            box-shadow: 0 0 30px rgba(74,222,128,0.4);
+        }
+        
+        .menu-btn.primary {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-color: #22c55e;
+            font-weight: bold;
+        }
+        
+        .menu-btn.primary:hover {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+        }
+        
+        /* Version Info */
+        .version-info {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+        
+        /* ==================== */
+        /* CHARACTER CREATION */
+        /* ==================== */
+        #character-creation {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            z-index: 9999;
+            overflow-y: auto;
+        }
+        
+        .creation-header {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .creation-title {
+            font-size: 3rem;
+            color: #fbbf24;
+            margin-bottom: 0.5rem;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .step {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+        }
+        
+        .step.active {
+            background: rgba(251,191,36,0.2);
+            border-color: #fbbf24;
+        }
+        
+        .step.completed {
+            background: rgba(74,222,128,0.2);
+            border-color: #4ade80;
+        }
+        
+        .creation-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .species-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .species-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .species-card:hover {
+            transform: translateY(-5px);
+            border-color: #4ade80;
+            box-shadow: 0 10px 40px rgba(74,222,128,0.2);
+        }
+        
+        .species-card.selected {
+            border-color: #fbbf24;
+            background: rgba(251,191,36,0.1);
+            box-shadow: 0 0 30px rgba(251,191,36,0.3);
+        }
+        
+        .species-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .species-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .species-scientific {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-style: italic;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .species-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .stat {
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        
+        .stat-label { color: rgba(255,255,255,0.5); }
+        .stat-value { color: #4ade80; font-weight: bold; }
+        
+        .evolution-path {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.4;
+        }
+        
+        .creation-footer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.9);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* ==================== */
+        /* GAME UI */
+        /* ==================== */
+        #game-container {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+        
+        #game-canvas {
+            width: 100%; height: 100%;
+            display: block;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+        
+        .hud-panel {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            pointer-events: auto;
+        }
+        
+        /* Top Left - Player Stats */
+        #player-stats {
+            position: absolute;
+            top: 20px; left: 20px;
+            width: 280px;
+        }
+        
+        .stat-bar-container {
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-bar-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-bar {
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        
+        .health-fill { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        .stamina-fill { background: linear-gradient(90deg, #22c55e, #16a34a); }
+        .mana-fill { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+        .xp-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        
+        .player-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-label { color: rgba(255,255,255,0.5); }
+        .info-value { color: white; font-weight: 600; }
+        
+        /* Top Right - Minimap & Quests */
+        #top-right-panel {
+            position: absolute;
+            top: 20px; right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .minimap {
+            width: 150px; height: 150px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .minimap-player {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px; height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4ade80;
+        }
+        
+        .quest-tracker {
+            width: 250px;
+        }
+        
+        .quest-title {
+            font-family: 'Cinzel', serif;
+            color: #fbbf24;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .quest-item {
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid #fbbf24;
+        }
+        
+        .quest-name { font-size: 0.85rem; font-weight: 600; }
+        .quest-desc { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+        
+        /* Bottom - Action Bar */
+        #action-bar {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-slot {
+            width: 60px; height: 60px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            position: relative;
+        }
+        
+        .action-slot.active {
+            border-color: #fbbf24;
+            box-shadow: 0 0 20px rgba(251,191,36,0.5);
+        }
+        
+        .action-key {
+            position: absolute;
+            top: 2px; left: 4px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        /* Dialogue System */
+        #dialogue-box {
+            display: none;
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            background: rgba(0,0,0,0.95);
+            border: 2px solid #fbbf24;
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        
+        .dialogue-speaker {
+            font-family: 'Cinzel', serif;
+            color: #fbbf24;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dialogue-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .dialogue-options {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .dialogue-option {
+            background: rgba(255,255,255,0.1);
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .dialogue-option:hover {
+            background: rgba(251,191,36,0.2);
+            border-left: 3px solid #fbbf24;
+        }
+        
+        /* Inventory */
+        #inventory-screen {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px; height: 500px;
+            background: rgba(15, 23, 42, 0.98);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+        
+        .inv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .inv-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: #fbbf24;
+        }
+        
+        .inv-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .inv-slot {
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .inv-slot:hover {
+            border-color: #4ade80;
+            background: rgba(74,222,128,0.1);
+        }
+        
+        /* Loading Screen */
+        #loading-screen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #0a0a1a;
+            z-index: 99999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-spinner {
+            width: 80px; height: 80px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #4ade80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 100px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            z-index: 100000;
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== -->
+<!-- TITLE SCREEN -->
+<!-- ==================== -->
+<div id="title-screen">
+    <div class="particles" id="particles"></div>
+    <div class="orb" style="top: 20%; left: 20%;"></div>
+    <div class="orb" style="bottom: 20%; right: 20%; animation-delay: 2s;"></div>
+    
+    <h1 class="game-title font-decorative">EVOLUTION ODYSSEY</h1>
+    <p class="subtitle font-display">The RPG Adventure</p>
+    
+    <div class="menu-container">
+        <button class="menu-btn primary" onclick="startNewGame()">
+            🎮 NEW GAME
+        </button>
+        <button class="menu-btn" onclick="loadGame()">
+            💾 LOAD GAME
+        </button>
+        <button class="menu-btn" onclick="showSettings()">
+            ⚙️ SETTINGS
+        </button>
+        <button class="menu-btn" onclick="showCredits()">
+            📜 CREDITS
+        </button>
+    </div>
+    
+    <div class="version-info">
+        Version 1.0.0 | Press F11 for Fullscreen
+    </div>
+</div>
+
+<!-- ==================== -->
+<!-- CHARACTER CREATION -->
+<!-- ==================== -->
+<div id="character-creation">
+    <div class="creation-header">
+        <h2 class="creation-title font-display">Choose Your Destiny</h2>
+        <p style="color: rgba(255,255,255,0.6);">Select your starting species and begin your evolutionary journey</p>
+        
+        <div class="step-indicator">
+            <div class="step completed">1</div>
+            <div class="step active">2</div>
+            <div class="step">3</div>
+        </div>
+    </div>
+    
+    <div class="creation-content">
+        <div class="species-grid" id="species-selection">
+            <!-- Generated by JavaScript -->
+        </div>
+    </div>
+    
+    <div class="creation-footer">
+        <button class="px-6 py-2 border border-white/30 rounded hover:bg-white/10" onclick="backToTitle()">
+            ← Back
+        </button>
+        <div style="color: rgba(255,255,255,0.5);">
+            <span id="selected-species-name">No species selected</span>
+        </div>
+        <button class="px-8 py-2 bg-green-600 hover:bg-green-500 rounded font-bold" onclick="confirmCharacter()" id="confirm-btn" disabled>
+            Begin Journey →
+        </button>
+    </div>
+</div>
+
+<!-- ==================== -->
+<!-- LOADING SCREEN -->
+<!-- ==================== -->
+<div id="loading-screen">
+    <div class="loading-spinner"></div>
+    <h2 class="text-2xl font-display mt-4" style="color: #4ade80;">Generating World...</h2>
+    <p style="color: rgba(255,255,255,0.5); margin-top: 0.5rem;" id="loading-text">Spawning ecosystems</p>
+</div>
+
+<!-- ==================== -->
+<!-- GAME CONTAINER -->
+<!-- ==================== -->
+<div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    
+    <!-- HUD -->
+    <div id="hud" style="display: none;">
+        <!-- Player Stats -->
+        <div id="player-stats" class="hud-panel">
+            <div class="stat-bar-container">
+                <div class="stat-bar-header">
+                    <span style="color: #ef4444;">❤️ Health</span>
+                    <span id="health-text">100/100</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill health-fill" id="health-bar" style="width: 100%"></div>
+                </div>
+            </div>
+            
+            <div class="stat-bar-container">
+                <div class="stat-bar-header">
+                    <span style="color: #22c55e;">⚡ Stamina</span>
+                    <span id="stamina-text">100/100</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill stamina-fill" id="stamina-bar" style="width: 100%"></div>
+                </div>
+            </div>
+            
+            <div class="stat-bar-container">
+                <div class="stat-bar-header">
+                    <span style="color: #fbbf24;">⭐ XP</span>
+                    <span id="xp-text">Level 1</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill xp-fill" id="xp-bar" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="player-info">
+                <div class="info-row">
+                    <span class="info-label">Species:</span>
+                    <span class="info-value" id="hud-species" style="color: #4ade80;">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Class:</span>
+                    <span class="info-value" id="hud-class">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Era:</span>
+                    <span class="info-value" id="hud-era" style="color: #fbbf24;">Prehistoric</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Biome:</span>
+                    <span class="info-value" id="hud-biome" style="color: #60a5fa;">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Right -->
+        <div id="top-right-panel">
+            <div class="minimap">
+                <div class="minimap-player"></div>
+            </div>
+            
+            <div class="hud-panel quest-tracker">
+                <div class="quest-title">📜 Active Quests</div>
+                <div id="quest-list">
+                    <div class="quest-item">
+                        <div class="quest-name">The First Day</div>
+                        <div class="quest-desc">Find food and survive</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Bar -->
+        <div id="action-bar">
+            <div class="action-slot active" data-slot="1">
+                <span class="action-key">1</span>
+                👊
+            </div>
+            <div class="action-slot" data-slot="2">
+                <span class="action-key">2</span>
+                ⚔️
+            </div>
+            <div class="action-slot" data-slot="3">
+                <span class="action-key">3</span>
+                🛡️
+            </div>
+            <div class="action-slot" data-slot="4">
+                <span class="action-key">4</span>
+                🍖
+            </div>
+            <div class="action-slot" data-slot="5">
+                <span class="action-key">5</span>
+                💊
+            </div>
+            <div class="action-slot" data-slot="6">
+                <span class="action-key">6</span>
+                🔥
+            </div>
+            <div class="action-slot" data-slot="7">
+                <span class="action-key">7</span>
+                🎣
+            </div>
+            <div class="action-slot" data-slot="8">
+                <span class="action-key">8</span>
+                🏹
+            </div>
+        </div>
+        
+        <!-- Dialogue Box -->
+        <div id="dialogue-box">
+            <div class="dialogue-speaker" id="dialogue-speaker">Village Elder</div>
+            <div class="dialogue-text" id="dialogue-text">
+                Welcome, traveler. The world is vast and full of dangers. Will you help our village?
+            </div>
+            <div class="dialogue-options" id="dialogue-options">
+                <div class="dialogue-option" onclick="selectDialogue(0)">I'll help you.</div>
+                <div class="dialogue-option" onclick="selectDialogue(1)">I need more information.</div>
+                <div class="dialogue-option" onclick="selectDialogue(2)">Not right now.</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Inventory Screen -->
+    <div id="inventory-screen">
+        <div class="inv-header">
+            <h2 class="inv-title">Inventory</h2>
+            <button onclick="toggleInventory()" style="color: rgba(255,255,255,0.5); font-size: 1.5rem;">✕</button>
+        </div>
+        <div class="inv-grid" id="inventory-grid">
+            <!-- Generated by JS -->
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+
+<script>
+// ==========================================
+// EVOLUTION ODYSSEY RPG
+// Complete Adventure Game
+// ==========================================
+
+// Game State
+const GameState = {
+    current: 'TITLE', // TITLE, CHARACTER_CREATION, LOADING, GAME
+    player: null,
+    world: null,
+    camera: null,
+    renderer: null,
+    scene: null
+};
+
+// RPG Player Data
+const PlayerData = {
+    species: null,
+    name: '',
+    level: 1,
+    xp: 0,
+    maxXp: 100,
+    health: 100,
+    maxHealth: 100,
+    stamina: 100,
+    maxStamina: 100,
+    mana: 50,
+    maxMana: 50,
+    strength: 10,
+    agility: 10,
+    intelligence: 10,
+    inventory: [],
+    equipment: {
+        weapon: null,
+        armor: null,
+        accessory: null
+    },
+    quests: [],
+    skills: [],
+    position: { x: 0, y: 10, z: 0 },
+    rotation: 0,
+    era: 'Prehistoric',
+    reputation: {
+        humans: 0,
+        animals: 0,
+        nature: 0
+    }
+};
+
+// Species Database with RPG Classes
+const SpeciesDB = {
+    human: {
+        name: 'Human',
+        icon: '🧑',
+        scientific: 'Homo sapiens',
+        class: 'Adaptable',
+        description: 'Masters of tool use and civilization building. Can learn any skill.',
+        evolution: 'Sahelanthropus → Australopithecus → Homo habilis → Homo erectus → Homo sapiens',
+        stats: { health: 100, stamina: 100, mana: 50, str: 10, agi: 10, int: 15 },
+        abilities: ['Craft', 'Build', 'Farm', 'Tame', 'Technology', 'Speech'],
+        canFly: false,
+        canSwim: true,
+        diet: 'omnivore',
+        biome: 'any'
+    },
+    lion: {
+        name: 'Lion',
+        icon: '🦁',
+        scientific: 'Panthera leo',
+        class: 'Apex Predator',
+        description: 'King of beasts. Hunts in prides. Mighty roar strikes fear into enemies.',
+        evolution: 'Miacidae (50 MYA) → Pseudaelurus (20 MYA) → Panthera leo fossilis (700 KYA) → Modern',
+        stats: { health: 150, stamina: 120, mana: 20, str: 18, agi: 12, int: 6 },
+        abilities: ['Mighty Roar', 'Pack Hunt', 'Pounce', 'Night Vision', 'Terrify'],
+        canFly: false,
+        canSwim: false,
+        diet: 'carnivore',
+        biome: 'savanna'
+    },
+    eagle: {
+        name: 'Golden Eagle',
+        icon: '🦅',
+        scientific: 'Aquila chrysaetos',
+        class: 'Sky Hunter',
+        description: 'Supreme aerial predator. Can spot prey from miles away.',
+        evolution: 'Archaeopteryx (150 MYA) → Microraptor (120 MYA) → Accipitridae (50 MYA) → Modern',
+        stats: { health: 60, stamina: 150, mana: 30, str: 8, agi: 20, int: 10 },
+        abilities: ['Dive Attack', 'Keen Eye', 'Wind Ride', 'Swoop', 'Aerial Mastery'],
+        canFly: true,
+        canSwim: false,
+        diet: 'carnivore',
+        biome: 'mountain'
+    },
+    whale: {
+        name: 'Blue Whale',
+        icon: '🐋',
+        scientific: 'Balaenoptera musculus',
+        class: 'Ocean Giant',
+        description: 'Largest animal ever. Sings ancient songs across the seas.',
+        evolution: 'Pakicetus (50 MYA) → Ambulocetus (49 MYA) → Basilosaurus (40 MYA) → Modern',
+        stats: { health: 500, stamina: 80, mana: 60, str: 25, agi: 5, int: 12 },
+        abilities: ['Song of the Deep', 'Breach', 'Filter Feed', 'Pressure Immunity', 'Echolocation'],
+        canFly: false,
+        canSwim: true,
+        diet: 'carnivore',
+        biome: 'ocean'
+    },
+    wolf: {
+        name: 'Gray Wolf',
+        icon: '🐺',
+        scientific: 'Canis lupus',
+        class: 'Pack Stalker',
+        description: 'Ancestor of all dogs. Masters of cooperative hunting.',
+        evolution: 'Miacis (52 MYA) → Hesperocyon (40 MYA) → Tomarctus (20 MYA) → Canis lupus (1 MYA)',
+        stats: { health: 90, stamina: 130, mana: 25, str: 12, agi: 16, int: 10 },
+        abilities: ['Howl', 'Pack Tactics', 'Track', 'Endurance Hunt', 'Intimidate'],
+        canFly: false,
+        canSwim: true,
+        diet: 'carnivore',
+        biome: 'forest'
+    },
+    bear: {
+        name: 'Grizzly Bear',
+        icon: '🐻',
+        scientific: 'Ursus arctos horribilis',
+        class: 'Forest Guardian',
+        description: 'Omnivorous giant. Hibernates through winter. Fierce when provoked.',
+        evolution: 'Parictis (38 MYA) → Ursavus (20 MYA) → Ursus etruscus (5 MYA) → Modern',
+        stats: { health: 200, stamina: 100, mana: 20, str: 20, agi: 8, int: 8 },
+        abilities: ['Hibernate', 'Salmon Catch', 'Maul', 'Intimidate', 'Forage'],
+        canFly: false,
+        canSwim: true,
+        diet: 'omnivore',
+        biome: 'forest'
+    },
+    shark: {
+        name: 'Great White Shark',
+        icon: '🦈',
+        scientific: 'Carcharodon carcharias',
+        class: 'Perfect Predator',
+        description: 'Unchanged for millions of years. Can detect a drop of blood from miles away.',
+        evolution: 'Cladoselache (370 MYA) → Hybodus (200 MYA) → Cretolamna (100 MYA) → Modern',
+        stats: { health: 120, stamina: 140, mana: 15, str: 18, agi: 14, int: 5 },
+        abilities: ['Blood Frenzy', 'Electroreception', 'Breach', 'Scent Tracking', 'Death Roll'],
+        canFly: false,
+        canSwim: true,
+        diet: 'carnivore',
+        biome: 'ocean'
+    },
+    elephant: {
+        name: 'African Elephant',
+        icon: '🐘',
+        scientific: 'Loxodonta africana',
+        class: 'Earth Mover',
+        description: 'Never forgets. Matriarchal society. Can fell trees with ease.',
+        evolution: 'Eritherium (60 MYA) → Moeritherium (37 MYA) → Palaeomastodon (35 MYA) → Modern',
+        stats: { health: 300, stamina: 90, mana: 40, str: 22, agi: 4, int: 14 },
+        abilities: ['Memory', 'Stampede', 'Water Spray', 'Trunk Grab', 'Earthquake'],
+        canFly: false,
+        canSwim: true,
+        diet: 'herbivore',
+        biome: 'savanna'
+    },
+    tiger: {
+        name: 'Siberian Tiger',
+        icon: '🐅',
+        scientific: 'Panthera tigris altaica',
+        class: 'Shadow Stalker',
+        description: 'Largest cat. Solitary hunter. Stripes are unique as fingerprints.',
+        evolution: 'Miacidae → Pseudaelurus → Panthera zdanskyi (2 MYA) → Modern',
+        stats: { health: 140, stamina: 110, mana: 25, str: 17, agi: 15, int: 9 },
+        abilities: ['Ambush', 'Stalk', 'Power Bite', 'Climb', 'Silent Kill'],
+        canFly: false,
+        canSwim: true,
+        diet: 'carnivore',
+        biome: 'forest'
+    },
+    dolphin: {
+        name: 'Bottlenose Dolphin',
+        icon: '🐬',
+        scientific: 'Tursiops truncatus',
+        class: 'Ocean Sage',
+        description: 'Highly intelligent. Self-aware. Uses echolocation to navigate.',
+        evolution: 'Pakicetus → Remingtonocetus → Protocetus → Tursiops (Modern)',
+        stats: { health: 80, stamina: 160, mana: 50, str: 10, agi: 18, int: 16 },
+        abilities: ['Echolocate', 'Leap', 'Sonar Blast', 'Pod Tactics', 'Communication'],
+        canFly: false,
+        canSwim: true,
+        diet: 'carnivore',
+        biome: 'ocean'
+    },
+    ant: {
+        name: 'Army Ant',
+        icon: '🐜',
+        scientific: 'Eciton burchellii',
+        class: 'Swarm Lord',
+        description: 'Strength in numbers. Represents 10 quintillion insects alive.',
+        evolution: 'Sphecomyrma (100 MYA) → Formicidae diversification → Eciton (Modern)',
+        stats: { health: 20, stamina: 200, mana: 30, str: 3, agi: 8, int: 12 },
+        abilities: ['Swarm', 'Carry Heavy', 'Dig', 'Colony Mind', 'Overwhelm'],
+        canFly: false,
+        canSwim: false,
+        diet: 'carnivore',
+        biome: 'jungle'
+    },
+    butterfly: {
+        name: 'Monarch Butterfly',
+        icon: '🦋',
+        scientific: 'Danaus plexippus',
+        class: 'Pollinator',
+        description: 'Migrates 3,000 miles. Critical for ecosystem survival.',
+        evolution: 'Kalligrammatidae (165 MYA) → Papilionoidea → Danaus (Modern)',
+        stats: { health: 10, stamina: 100, mana: 40, str: 1, agi: 12, int: 8 },
+        abilities: ['Pollinate', 'Metamorphosis', 'Migrate', 'Camouflage', 'Flutter'],
+        canFly: true,
+        canSwim: false,
+        diet: 'herbivore',
+        biome: 'forest'
+    }
+};
+
+// Quest System
+const QuestSystem = {
+    active: [],
+    completed: [],
+    
+    quests: [
+        {
+            id: 'first_day',
+            name: 'The First Day',
+            description: 'Survive your first day in this new world. Find food and water.',
+            objectives: [
+                { text: 'Find food', completed: false },
+                { text: 'Find water', completed: false },
+                { text: 'Survive until sunset', completed: false }
+            ],
+            reward: { xp: 100, items: ['Basic Tool'] }
+        },
+        {
+            id: 'evolution_begin',
+            name: 'Path of Evolution',
+            description: 'Begin your evolutionary journey. Gain your first level.',
+            objectives: [
+                { text: 'Gain 100 XP', completed: false }
+            ],
+            reward: { xp: 200, skill: 'Adaptation' }
+        },
+        {
+            id: 'human_contact',
+            name: 'First Contact',
+            description: 'Find and interact with humans (if not human).',
+            objectives: [
+                { text: 'Find a human village', completed: false },
+                { text: 'Speak with the elder', completed: false }
+            ],
+            reward: { xp: 300, reputation: { humans: 10 } }
+        }
+    ],
+    
+    startQuest: function(questId) {
+        const quest = this.quests.find(q => q.id === questId);
+        if (quest && !this.active.find(q => q.id === questId)) {
+            this.active.push({...quest});
+            showNotification(`Quest Started: ${quest.name}`, '#fbbf24');
+            updateQuestDisplay();
+        }
+    },
+    
+    completeObjective: function(questId, objectiveIndex) {
+        const quest = this.active.find(q => q.id === questId);
+        if (quest) {
+            quest.objectives[objectiveIndex].completed = true;
+            showNotification(`Objective Complete: ${quest.objectives[objectiveIndex].text}`, '#4ade80');
+            
+            // Check if all objectives complete
+            if (quest.objectives.every(o => o.completed)) {
+                this.completeQuest(questId);
+            }
+            updateQuestDisplay();
+        }
+    },
+    
+    completeQuest: function(questId) {
+        const questIndex = this.active.findIndex(q => q.id === questId);
+        if (questIndex > -1) {
+            const quest = this.active[questIndex];
+            this.completed.push(quest);
+            this.active.splice(questIndex, 1);
+            
+            // Give rewards
+            PlayerData.xp += quest.reward.xp;
+            showNotification(`Quest Complete: ${quest.name}! +${quest.reward.xp} XP`, '#fbbf24');
+            checkLevelUp();
+        }
+    }
+};
+
+// Initialize Title Screen
+function initTitleScreen() {
+    // Create particles
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+        container.appendChild(particle);
+    }
+}
+
+// Title Screen Functions
+function startNewGame() {
+    document.getElementById('title-screen').style.display = 'none';
+    document.getElementById('character-creation').style.display = 'block';
+    populateSpeciesSelection();
+    GameState.current = 'CHARACTER_CREATION';
+}
+
+function loadGame() {
+    showNotification('Load Game feature coming soon!', '#60a5fa');
+}
+
+function showSettings() {
+    showNotification('Settings: Press F11 for Fullscreen | WASD to Move | Mouse to Look', '#60a5fa');
+}
+
+function showCredits() {
+    showNotification('Evolution Odyssey RPG - Created with Three.js - Based on real evolutionary science', '#fbbf24');
+}
+
+function backToTitle() {
+    document.getElementById('character-creation').style.display = 'none';
+    document.getElementById('title-screen').style.display = 'flex';
+    GameState.current = 'TITLE';
+}
+
+// Character Creation
+function populateSpeciesSelection() {
+    const grid = document.getElementById('species-selection');
+    grid.innerHTML = '';
+    
+    Object.entries(SpeciesDB).forEach(([key, species]) => {
+        const card = document.createElement('div');
+        card.className = 'species-card';
+        card.onclick = () => selectSpecies(key, card);
+        card.innerHTML = `
+            <div class="species-icon">${species.icon}</div>
+            <div class="species-name">${species.name}</div>
+            <div class="species-scientific">${species.scientific}</div>
+            <div style="text-align: center; color: #fbbf24; font-size: 0.9rem; margin-bottom: 0.5rem;">${species.class}</div>
+            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 1rem;">
+                ${species.description.substring(0, 60)}...
+            </div>
+            <div class="species-stats">
+                <div class="stat">
+                    <div class="stat-label">❤️ HP</div>
+                    <div class="stat-value">${species.stats.health}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">⚡ STA</div>
+                    <div class="stat-value">${species.stats.stamina}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">💪 STR</div>
+                    <div class="stat-value">${species.stats.str}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">🏃 AGI</div>
+                    <div class="stat-value">${species.stats.agi}</div>
+                </div>
+            </div>
+            <div class="evolution-path">
+                <strong>Evolution:</strong><br>
+                ${species.evolution.split('→')[0]} → ...
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+let selectedSpeciesKey = null;
+
+function selectSpecies(key, card) {
+    document.querySelectorAll('.species-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedSpeciesKey = key;
+    
+    const species = SpeciesDB[key];
+    document.getElementById('selected-species-name').innerHTML = 
+        `Selected: <span style="color: #4ade80;">${species.name}</span> (${species.class})`;
+    document.getElementById('confirm-btn').disabled = false;
+}
+
+function confirmCharacter() {
+    if (!selectedSpeciesKey) return;
+    
+    const species = SpeciesDB[selectedSpeciesKey];
+    PlayerData.species = selectedSpeciesKey;
+    PlayerData.name = species.name;
+    PlayerData.maxHealth = species.stats.health;
+    PlayerData.health = species.stats.health;
+    PlayerData.maxStamina = species.stats.stamina;
+    PlayerData.stamina = species.stats.stamina;
+    PlayerData.maxMana = species.stats.mana;
+    PlayerData.mana = species.stats.mana;
+    PlayerData.strength = species.stats.str;
+    PlayerData.agility = species.stats.agi;
+    PlayerData.intelligence = species.stats.int;
+    
+    // Hide character creation, show loading
+    document.getElementById('character-creation').style.display = 'none';
+    document.getElementById('loading-screen').style.display = 'flex';
+    
+    // Simulate loading
+    const loadingTexts = [
+        'Generating world terrain...',
+        'Spawning ecosystems...',
+        'Populating wildlife...',
+        'Creating villages...',
+        'Preparing your journey...'
+    ];
+    
+    let step = 0;
+    const interval = setInterval(() => {
+        if (step < loadingTexts.length) {
+            document.getElementById('loading-text').textContent = loadingTexts[step];
+            step++;
+        } else {
+            clearInterval(interval);
+            startGame();
+        }
+    }, 800);
+}
+
+// Three.js Game Setup
+let scene, camera, renderer, playerMesh, terrain, water;
+let simplex = new SimplexNoise();
+let cameraAngle = 0;
+let cameraPitch = 0.3;
+
+function startGame() {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('game-container').style.display = 'block';
+    document.getElementById('hud').style.display = 'block';
+    
+    initThreeJS();
+    createPlayer();
+    generateWorld();
+    initInventory();
+    
+    // Start first quest
+    QuestSystem.startQuest('first_day');
+    
+    // Lock pointer
+    document.getElementById('game-canvas').requestPointerLock();
+    
+    GameState.current = 'GAME';
+    gameLoop();
+    
+    showNotification(`Welcome, ${PlayerData.name}! Your adventure begins now.`, '#4ade80');
+}
+
+function initThreeJS() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB);
+    scene.fog = new THREE.Fog(0x87CEEB, 50, 300);
+    
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    
+    renderer = new THREE.WebGLRenderer({ 
+        canvas: document.getElementById('game-canvas'),
+        antialias: true 
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    // Lighting
+    const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambient);
+    
+    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+    sun.position.set(100, 200, 100);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 4096;
+    sun.shadow.mapSize.height = 4096;
+    scene.add(sun);
+}
+
+function getTerrainHeight(x, z) {
+    const scale1 = 0.005;
+    const scale2 = 0.02;
+    const scale3 = 0.05;
+    
+    let y = simplex.noise2D(x * scale1, z * scale1) * 30;
+    y += simplex.noise2D(x * scale2, z * scale2) * 10;
+    y += simplex.noise2D(x * scale3, z * scale3) * 3;
+    
+    const dist = Math.sqrt(x * x + z * z);
+    if (dist > 150) y -= (dist - 150) * 0.5;
+    
+    return Math.max(-30, y);
+}
+
+function getBiome(x, z, height) {
+    const temp = simplex.noise2D(x * 0.01 + 1000, z * 0.01);
+    const moisture = simplex.noise2D(x * 0.01, z * 0.01 + 1000);
+    
+    if (height < -10) return 'ocean';
+    if (height < -3) return 'beach';
+    if (height > 25) return temp > 0 ? 'volcano' : 'snow_mountain';
+    if (temp > 0.4 && moisture < 0) return 'desert';
+    if (temp < -0.3) return 'tundra';
+    if (moisture > 0.4) return height > 15 ? 'jungle' : 'swamp';
+    if (moisture > 0) return 'forest';
+    return 'plains';
+}
+
+function generateWorld() {
+    // Terrain
+    const geometry = new THREE.PlaneGeometry(400, 400, 200, 200);
+    geometry.rotateX(-Math.PI / 2);
+    
+    const vertices = geometry.attributes.position.array;
+    const colors = [];
+    
+    for (let i = 0; i < vertices.length; i += 3) {
+        const x = vertices[i];
+        const z = vertices[i + 2];
+        const y = getTerrainHeight(x, z);
+        vertices[i + 1] = y;
+        
+        const biome = getBiome(x, z, y);
+        let color;
+        switch(biome) {
+            case 'ocean': color = new THREE.Color(0x006994); break;
+            case 'beach': color = new THREE.Color(0xF4A460); break;
+            case 'desert': color = new THREE.Color(0xEDC9AF); break;
+            case 'forest': color = new THREE.Color(0x228B22); break;
+            case 'jungle': color = new THREE.Color(0x006400); break;
+            case 'snow_mountain': color = new THREE.Color(0xFFFFFF); break;
+            case 'volcano': color = new THREE.Color(0x8B0000); break;
+            default: color = new THREE.Color(0x90EE90);
+        }
+        colors.push(color.r, color.g, color.b);
+    }
+    
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    geometry.computeVertexNormals();
+    
+    terrain = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+        vertexColors: true,
+        roughness: 0.9,
+        flatShading: true
+    }));
+    terrain.receiveShadow = true;
+    scene.add(terrain);
+    
+    // Water
+    const waterGeo = new THREE.PlaneGeometry(400, 400);
+    waterGeo.rotateX(-Math.PI / 2);
+    water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({
+        color: 0x006994,
+        transparent: true,
+        opacity: 0.6,
+        roughness: 0.1,
+        metalness: 0.8
+    }));
+    water.position.y = -8;
+    scene.add(water);
+    
+    // Add some trees
+    for (let i = 0; i < 100; i++) {
+        const x = (Math.random() - 0.5) * 300;
+        const z = (Math.random() - 0.5) * 300;
+        const y = getTerrainHeight(x, z);
+        
+        if (y > 0 && y < 20) {
+            createTree(x, y, z);
+        }
+    }
+}
+
+function createTree(x, y, z) {
+    const group = new THREE.Group();
+    
+    const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.5, 2, 6),
+        new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+    );
+    trunk.position.y = 1;
+    trunk.castShadow = true;
+    group.add(trunk);
+    
+    const leaves = new THREE.Mesh(
+        new THREE.ConeGeometry(2, 4, 8),
+        new THREE.MeshStandardMaterial({ color: 0x228B22 })
+    );
+    leaves.position.y = 3;
+    leaves.castShadow = true;
+    group.add(leaves);
+    
+    group.position.set(x, y, z);
+    scene.add(group);
+}
+
+function createPlayer() {
+    const species = SpeciesDB[PlayerData.species];
+    const group = new THREE.Group();
+    
+    // Create based on species
+    switch(PlayerData.species) {
+        case 'human':
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(0.6, 1, 0.3),
+                new THREE.MeshStandardMaterial({ color: 0x4169E1 })
+            );
+            body.position.y = 0.5;
+            group.add(body);
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.25, 16, 12),
+                new THREE.MeshStandardMaterial({ color: 0xFDBCB4 })
+            );
+            head.position.y = 1.1;
+            group.add(head);
+            break;
+            
+        case 'lion':
+            const lBody = new THREE.Mesh(
+                new THREE.BoxGeometry(1.2, 0.8, 2),
+                new THREE.MeshStandardMaterial({ color: 0xDAA520 })
+            );
+            lBody.position.y = 0.4;
+            group.add(lBody);
+            break;
+            
+        default:
+            const gBody = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 0.6, 1.5),
+                new THREE.MeshStandardMaterial({ color: 0x888888 })
+            );
+            gBody.position.y = 0.3;
+            group.add(gBody);
+    }
+    
+    group.position.set(0, 10, 0);
+    group.castShadow = true;
+    scene.add(group);
+    playerMesh = group;
+}
+
+// Input handling
+const keys = {};
+let mouseX = 0, mouseY = 0;
+
+document.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+    
+    if (GameState.current === 'GAME') {
+        switch(e.key.toLowerCase()) {
+            case ' ':
+                if (playerMesh && PlayerData.velocity === 0) {
+                    PlayerData.velocity = 12;
+                }
+                break;
+            case 'i':
+                toggleInventory();
+                break;
+            case 'e':
+                interact();
+                break;
+            case 'q':
+                attack();
+                break;
+        }
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (GameState.current === 'GAME') {
+        mouseX = e.movementX;
+        mouseY = e.movementY;
+    }
+});
+
+document.getElementById('game-canvas').addEventListener('click', () => {
+    if (GameState.current === 'GAME') {
+        document.getElementById('game-canvas').requestPointerLock();
+    }
+});
+
+// Game functions
+function attack() {
+    showNotification('You attack!', '#ef4444');
+    // Combat logic here
+}
+
+function interact() {
+    showNotification('Interacting...', '#60a5fa');
+    // Interaction logic here
+}
+
+function toggleInventory() {
+    const inv = document.getElementById('inventory-screen');
+    inv.style.display = inv.style.display === 'none' ? 'block' : 'none';
+}
+
+function initInventory() {
+    const grid = document.getElementById('inventory-grid');
+    for (let i = 0; i < 40; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'inv-slot';
+        slot.innerHTML = i === 0 ? '🍎' : '';
+        grid.appendChild(slot);
+    }
+}
+
+function checkLevelUp() {
+    if (PlayerData.xp >= PlayerData.maxXp) {
+        PlayerData.level++;
+        PlayerData.xp -= PlayerData.maxXp;
+        PlayerData.maxXp = PlayerData.level * 100;
+        PlayerData.maxHealth += 10;
+        PlayerData.health = PlayerData.maxHealth;
+        
+        showNotification(`Level Up! You are now level ${PlayerData.level}!`, '#fbbf24');
+        updateHUD();
+    }
+}
+
+function updateHUD() {
+    document.getElementById('health-text').textContent = 
+        `${Math.floor(PlayerData.health)}/${PlayerData.maxHealth}`;
+    document.getElementById('health-bar').style.width = 
+        `${(PlayerData.health / PlayerData.maxHealth) * 100}%`;
+    
+    document.getElementById('stamina-text').textContent = 
+        `${Math.floor(PlayerData.stamina)}/${PlayerData.maxStamina}`;
+    document.getElementById('stamina-bar').style.width = 
+        `${(PlayerData.stamina / PlayerData.maxStamina) * 100}%`;
+    
+    document.getElementById('xp-text').textContent = `Level ${PlayerData.level}`;
+    document.getElementById('xp-bar').style.width = 
+        `${(PlayerData.xp / PlayerData.maxXp) * 100}%`;
+    
+    const species = SpeciesDB[PlayerData.species];
+    document.getElementById('hud-species').textContent = species.name;
+    document.getElementById('hud-class').textContent = species.class;
+}
+
+function updateQuestDisplay() {
+    const list = document.getElementById('quest-list');
+    list.innerHTML = '';
+    
+    QuestSystem.active.forEach(quest => {
+        const div = document.createElement('div');
+        div.className = 'quest-item';
+        div.innerHTML = `
+            <div class="quest-name">${quest.name}</div>
+            <div class="quest-desc">${quest.objectives.filter(o => !o.completed).length} objectives remaining</div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function showNotification(text, color) {
+    const notif = document.createElement('div');
+    notif.className = 'notification';
+    notif.style.borderColor = color;
+    notif.textContent = text;
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 4000);
+}
+
+// Main game loop
+function gameLoop() {
+    if (GameState.current !== 'GAME') return;
+    requestAnimationFrame(gameLoop);
+    
+    const delta = 0.016;
+    
+    if (playerMesh) {
+        const species = SpeciesDB[PlayerData.species];
+        const speed = keys['shift'] ? species.stats.agi * 0.15 : species.stats.agi * 0.1;
+        
+        const forward = new THREE.Vector3(Math.sin(cameraAngle), 0, Math.cos(cameraAngle));
+        const right = new THREE.Vector3(Math.cos(cameraAngle), 0, -Math.sin(cameraAngle));
+        
+        let move = new THREE.Vector3();
+        
+        if (keys['w']) move.add(forward);
+        if (keys['s']) move.sub(forward);
+        if (keys['a']) move.sub(right);
+        if (keys['d']) move.add(right);
+        
+        if (move.length() > 0) {
+            move.normalize().multiplyScalar(speed);
+            playerMesh.position.add(move);
+            playerMesh.rotation.y = Math.atan2(move.x, move.z);
+            
+            if (keys['shift']) {
+                PlayerData.stamina -= delta * 15;
+                if (PlayerData.stamina <= 0) keys['shift'] = false;
+            }
+        } else {
+            PlayerData.stamina = Math.min(PlayerData.maxStamina, PlayerData.stamina + delta * 10);
+        }
+        
+        // Physics
+        if (!PlayerData.velocity) PlayerData.velocity = 0;
+        PlayerData.velocity -= 30 * delta;
+        playerMesh.position.y += PlayerData.velocity * delta;
+        
+        const groundH = getTerrainHeight(playerMesh.position.x, playerMesh.position.z);
+        const biome = getBiome(playerMesh.position.x, playerMesh.position.z, groundH);
+        
+        if (biome === 'ocean' && playerMesh.position.y < -3) {
+            if (species.canSwim) {
+                PlayerData.velocity *= 0.3;
+                if (keys[' ']) PlayerData.velocity = 5;
+            } else {
+                PlayerData.health -= delta * 5;
+            }
+        }
+        
+        if (playerMesh.position.y <= groundH + 0.5) {
+            playerMesh.position.y = groundH + 0.5;
+            PlayerData.velocity = 0;
+        }
+        
+        // Camera
+        cameraAngle -= mouseX * 0.002;
+        cameraPitch = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, cameraPitch - mouseY * 0.002));
+        mouseX = 0;
+        mouseY = 0;
+        
+        const dist = 8;
+        const camX = playerMesh.position.x - Math.sin(cameraAngle) * Math.cos(cameraPitch) * dist;
+        const camY = playerMesh.position.y + Math.sin(cameraPitch) * dist;
+        const camZ = playerMesh.position.z - Math.cos(cameraAngle) * Math.cos(cameraPitch) * dist;
+        
+        camera.position.set(camX, camY, camZ);
+        camera.lookAt(playerMesh.position.x, playerMesh.position.y + 1, playerMesh.position.z);
+        
+        // Update HUD
+        updateHUD();
+        document.getElementById('hud-biome').textContent = 
+            biome.charAt(0).toUpperCase() + biome.slice(1);
+        
+        // Hunger
+        PlayerData.stamina = Math.min(PlayerData.maxStamina, PlayerData.stamina + delta * 5);
+    }
+    
+    // Animate water
+    if (water) {
+        water.position.y = -8 + Math.sin(Date.now() * 0.001) * 0.5;
+    }
+    
+    renderer.render(scene, camera);
+}
+
+// Window resize
+window.addEventListener('resize', () => {
+    if (camera && renderer) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+});
+
+// Initialize
+initTitleScreen();
+</script>
+
+</body>
+</html>
